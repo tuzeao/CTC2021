@@ -1,4 +1,4 @@
-from tokenization import FullTokenizer, convert_to_unicode
+from tokenization import WordpieceTokenizer, convert_to_unicode, load_vocab
 from tqdm import tqdm
 import argparse
 import sys
@@ -9,8 +9,8 @@ def main(args):
     if not os.path.exists(args.i):
         print("？")
         sys.exit()
-
-    tokenizer = FullTokenizer(vocab_file="vocab.txt")
+    vocab = load_vocab("vocab.txt")
+    tokenizer = WordpieceTokenizer(vocab=vocab)
     with open(args.i, "r", encoding="utf-8") as f, open(args.o, "w", encoding="utf-8") as w:
         lines = f.readlines()
         count = 0
@@ -27,8 +27,8 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--i', required=True)
-    parser.add_argument('--o', required=True)
+    parser.add_argument('-i', required=True)
+    parser.add_argument('-o', required=True)
     args = parser.parse_args()
     main(args)
 
