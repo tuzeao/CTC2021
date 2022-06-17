@@ -1,7 +1,8 @@
 import argparse
 
 from utils.helpers import read_lines
-from gector.gec_model import GecBERTModel
+# from gector.gec_model import GecBERTModel
+from gector.my_gec_model import GecBERTModel
 
 
 def predict_for_file(input_file, output_file, model, batch_size=32):
