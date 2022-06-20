@@ -143,8 +143,19 @@ class GecBERTModel(object):
             with torch.no_grad():
                 prediction = model.forward(**batch)
             predictions.append(prediction)
-
+        # print(predictions)
+        print(predictions[0]['class_probabilities_labels'].shape)
+        print(predictions[0]['class_probabilities_d_tags'].shape)
+        print(predictions[0]['class_probabilities_d_tags'])
+        print(predictions[0]['max_error_probability'].shape)
+        print(predictions[0]['error_probs'].shape)
+        print(predictions[0]['error_probs'])
+        print("*"*30)
         preds, idx, error_probs = self._convert(predictions)
+        print(preds, len(preds))
+        print(idx, len(idx))
+        print(error_probs, len(error_probs))
+        print("*"*30)
         t55 = time()
         if self.log:
             print(f"Inference time {t55 - t11}")
@@ -334,7 +345,7 @@ class GecBERTModel(object):
         print("-"*30)
         print(idxs)
         print("-"*30)
-        print(error_probs)
+        print({i: error_probs[i] for i in range(len(error_probs))})
 
         pred_batch = self.postprocess_batch(orig_batch, probabilities,
                                             idxs, error_probs)
