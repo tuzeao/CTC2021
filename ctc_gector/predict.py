@@ -153,4 +153,5 @@ if __name__ == '__main__':
                         help='Used to calculate weighted average', nargs='+',
                         default=None)
     args = parser.parse_args()
-    main(args)
+    # main(args)
+    my_main(args)
