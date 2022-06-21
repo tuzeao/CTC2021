@@ -76,7 +76,7 @@ def my_main(args):
     source = "小 萌 有 5 个 苹 果"
     target = "小 明 有 5 个 苹 果"
     all_probs = predict_probs_sentence(source, model)
-    from tag_index import index_to_tag
+    from tag_index import index_to_tag, tag_to_index
     from gen_edit_type import gen_edit_type
     source, target = "".join(source.split()), "".join(target.split()),
     edits = gen_edit_type(source, target)
@@ -88,6 +88,12 @@ def my_main(args):
     for i, idx in enumerate(edits_index):
         if i ==0: continue
         print(i-1, source[i-1], edits[i-1], idx, all_probs[i-1, idx])
+
+    import torch
+    max_val, max_idx = torch.max(all_probs, dim=-1)
+    for val, idx in zip(max_val, max_idx):
+        print(val, idx, tag_to_index.get(idx, "None"))
+
     #import torch
     #edits_index = torch.tensor(edits_index).float().reshape(1, -1).cuda()
     #result = torch.matmul(edits_index, all_probs)
