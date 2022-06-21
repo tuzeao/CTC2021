@@ -13,12 +13,12 @@ def predict_for_file(input_file, output_file, model, batch_size=32):
     for sent in test_data:
         batch.append(sent.split())
         if len(batch) == batch_size:
-            preds, cnt = model.handle_batch(batch)
+            preds, cnt = model.handle_batch_bak(batch)
             predictions.extend(preds)
             cnt_corrections += cnt
             batch = []
     if batch:
-        preds, cnt = model.handle_batch(batch)
+        preds, cnt = model.handle_batch_bak(batch)
         predictions.extend(preds)
         cnt_corrections += cnt
 
@@ -75,16 +75,24 @@ def my_main(args):
 
     source = "小 萌 有 5 个 苹 果"
     target = "小 明 有 5 个 苹 果"
-    all_probs = predict_probs_sentence(target, model)
-    from tag_index import tag_to_index
+    all_probs = predict_probs_sentence(source, model)
+    from tag_index import index_to_tag
     from gen_edit_type import gen_edit_type
+    source, target = "".join(source.split()), "".join(target.split()),
     edits = gen_edit_type(source, target)
-    edits_index = [tag_to_index.get(e, 16501) for e in edits]
+    print(edits)
+    edits_index = [0]+ [index_to_tag.get(e, 16501) for e in edits]
+    print(edits_index)
     all_probs = all_probs[0, :, :]
-    import torch
-    edits_index = torch.tensor(edits_index).reshape(1, -1)
-    result = torch.multiply(edits_index, all_probs)
-    print(result)
+    print(all_probs.shape)
+    for i, idx in enumerate(edits_index):
+        if i ==0: continue
+        print(i-1, source[i-1], edits[i-1], idx, all_probs[i-1, idx])
+    #import torch
+    #edits_index = torch.tensor(edits_index).float().reshape(1, -1).cuda()
+    #result = torch.matmul(edits_index, all_probs)
+    #print(result)
+    #print(result.shape)
 
 
 if __name__ == '__main__':

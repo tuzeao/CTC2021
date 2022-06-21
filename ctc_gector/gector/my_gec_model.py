@@ -346,7 +346,7 @@ class GecBERTModel(object):
         sequences = self.preprocess(orig_batch)
 
         if not sequences: return final_batch, total_updates
-        all_probs = self.predict(sequences)
+        all_probs = self.my_predict(sequences)
 
         return all_probs
 
