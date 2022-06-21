@@ -81,10 +81,9 @@ def my_main(args):
     edits = gen_edit_type(source, target)
     edits_index = [tag_to_index.get(e, 16501) for e in edits]
     all_probs = all_probs[0, :, :]
-    import numpy as np
-    edits_index = np.array(edits_index).reshape(1, -1)
-    all_probs = np.array(all_probs)
-    result = np.multiply(edits_index, all_probs)
+    import torch
+    edits_index = torch.tensor(edits_index).reshape(1, -1)
+    result = torch.multiply(edits_index, all_probs)
     print(result)
 
 
