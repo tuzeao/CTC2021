@@ -71,7 +71,7 @@ class Seq2Labels(Model):
         self.label_smoothing = label_smoothing
         self.confidence = confidence
         self.incorr_index = self.vocab.get_token_index("INCORRECT",
-                                                       namespace=detect_namespace)
+                                                       namespace=detect_namespace)  # 1
 
         self._verbose_metrics = verbose_metrics
         self.predictor_dropout = TimeDistributed(torch.nn.Dropout(predictor_dropout))

@@ -27,6 +27,15 @@ def predict_for_file(input_file, output_file, model, batch_size=32):
     return cnt_corrections
 
 
+def predict_probs_sentence(query, model):
+    batch = []
+    batch.append(query.split())
+    all_probs = model.handle_batch(batch)
+    return all_probs
+
+
+
+
 def main(args):
     # get all paths
     model = GecBERTModel(vocab_path=args.vocab_path,
@@ -47,6 +56,36 @@ def main(args):
                                        batch_size=args.batch_size)
     # evaluate with m2 or ERRANT
     print(f"Produced overall corrections: {cnt_corrections}")
+
+
+def my_main(args):
+    model = GecBERTModel(vocab_path=args.vocab_path,
+                         model_paths=args.model_path,
+                         max_len=args.max_len, min_len=args.min_len,
+                         iterations=args.iteration_count,
+                         min_error_probability=args.min_error_probability,
+                         min_probability=args.min_error_probability,
+                         lowercase_tokens=args.lowercase_tokens,
+                         model_name=args.transformer_model,
+                         special_tokens_fix=args.special_tokens_fix,
+                         log=False,
+                         confidence=args.additional_confidence,
+                         is_ensemble=args.is_ensemble,
+                         weigths=args.weights)
+
+    source = "小 萌 有 5 个 苹 果"
+    target = "小 明 有 5 个 苹 果"
+    all_probs = predict_probs_sentence(target, model)
+    from tag_index import tag_to_index
+    from gen_edit_type import gen_edit_type
+    edits = gen_edit_type(source, target)
+    edits_index = [tag_to_index.get(e, 16501) for e in edits]
+    all_probs = all_probs[0, :, :]
+    import numpy as np
+    edits_index = np.array(edits_index).reshape(1, -1)
+    all_probs = np.array(all_probs)
+    result = np.multiply(edits_index, all_probs)
+    print(result)
 
 
 if __name__ == '__main__':

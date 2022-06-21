@@ -161,6 +161,22 @@ class GecBERTModel(object):
             print(f"Inference time {t55 - t11}")
         return preds, idx, error_probs
 
+    def my_predict(self, batches):
+        t11 = time()
+        predictions = []
+        for batch, model in zip(batches, self.models):
+            batch = util.move_to_device(batch.as_tensor_dict(), 0 if torch.cuda.is_available() else -1)
+            with torch.no_grad():
+                prediction = model.forward(**batch)
+            predictions.append(prediction)
+        # print(predictions)
+        all_probs = self._my_convert(predictions)
+        t55 = time()
+        if self.log:
+            print(f"Inference time {t55 - t11}")
+        return all_probs
+
+
     def get_token_action(self, token, index, prob, sugg_token):
         """Get lost of suggested actions for token."""
         # cases when we don't need to do anything
@@ -227,8 +243,8 @@ class GecBERTModel(object):
         return batches
 
     def _convert(self, data):
-        all_class_probs = torch.zeros_like(data[0]['class_probabilities_labels'])
-        error_probs = torch.zeros_like(data[0]['max_error_probability'])
+        all_class_probs = torch.zeros_like(data[0]['class_probabilities_labels'])  # torch.Size([1, 25, 16502])
+        error_probs = torch.zeros_like(data[0]['max_error_probability'])  # torch.Size([1])
         for output, weight in zip(data, self.model_weights):
             all_class_probs += weight * output['class_probabilities_labels'] / sum(self.model_weights)
             error_probs += weight * output['max_error_probability'] / sum(self.model_weights)
@@ -237,6 +253,15 @@ class GecBERTModel(object):
         probs = max_vals[0].tolist()
         idx = max_vals[1].tolist()
         return probs, idx, error_probs.tolist()
+
+
+    def _my_convert(self, data):
+        all_class_probs = torch.zeros_like(data[0]['class_probabilities_labels'])  # torch.Size([1, 25, 16502])
+        error_probs = torch.zeros_like(data[0]['max_error_probability'])  # torch.Size([1])
+        for output, weight in zip(data, self.model_weights):
+            all_class_probs += weight * output['class_probabilities_labels'] / sum(self.model_weights)
+            error_probs += weight * output['max_error_probability'] / sum(self.model_weights)
+        return all_class_probs
 
     def update_final_batch(self, final_batch, pred_ids, pred_batch,
                            prev_preds_dict):
@@ -277,7 +302,7 @@ class GecBERTModel(object):
                 continue
 
             # skip whole sentence if probability of correctness is not high
-            if error_prob < self.min_error_probability:
+            if error_prob < self.min_error_probability:  # 一般设置为0
                 all_results.append(tokens)
                 continue
 
@@ -314,28 +339,33 @@ class GecBERTModel(object):
         pred_ids = [i for i in range(len(full_batch)) if i not in short_ids]
         total_updates = 0
 
-        # for n_iter in range(self.iterations):
-        #     orig_batch = [final_batch[i] for i in pred_ids]
-        #
-        #     sequences = self.preprocess(orig_batch)
-        #
-        #     if not sequences:
-        #         break
-        #     probabilities, idxs, error_probs = self.predict(sequences)
-        #
-        #     pred_batch = self.postprocess_batch(orig_batch, probabilities,
-        #                                         idxs, error_probs)
-        #     if self.log:
-        #         print(f"Iteration {n_iter + 1}. Predicted {round(100*len(pred_ids)/batch_size, 1)}% of sentences.")
-        #
-        #     final_batch, pred_ids, cnt = \
-        #         self.update_final_batch(final_batch, pred_ids, pred_batch,
-        #                                 prev_preds_dict)
-        #     total_updates += cnt
-        #
         if not pred_ids: return final_batch, total_updates
         orig_batch = [final_batch[i] for i in pred_ids]
 
+        # 生成Instance实例，不用看
+        sequences = self.preprocess(orig_batch)
+
+        if not sequences: return final_batch, total_updates
+        all_probs = self.predict(sequences)
+
+        return all_probs
+
+    def handle_batch_bak(self, full_batch):
+        """
+        Handle batch of requests.
+        """
+        final_batch = full_batch[:]
+        batch_size = len(full_batch)
+        prev_preds_dict = {i: [final_batch[i]] for i in range(len(final_batch))}
+        short_ids = [i for i in range(len(full_batch))
+                     if len(full_batch[i]) < self.min_len]
+        pred_ids = [i for i in range(len(full_batch)) if i not in short_ids]
+        total_updates = 0
+
+        if not pred_ids: return final_batch, total_updates
+        orig_batch = [final_batch[i] for i in pred_ids]
+
+        # 生成Instance实例，不用看
         sequences = self.preprocess(orig_batch)
 
         if not sequences: return final_batch, total_updates
@@ -347,6 +377,7 @@ class GecBERTModel(object):
         print("-"*30)
         print({i: error_probs[i] for i in range(len(error_probs))})
 
+        # 后处理，主要是针对得到的结果进行后处理，生成可读的信息和保留重要信息以及过滤不需要处理的句子
         pred_batch = self.postprocess_batch(orig_batch, probabilities,
                                             idxs, error_probs)
 
