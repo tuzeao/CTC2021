@@ -5,11 +5,20 @@ from gen_edit_type import gen_edit_type
 import torch
 
 # ------------------- init --------------------------------------
-model = GecBERTModel(vocab_path="data/output_vocabulary/",
-                     model_paths=["bert_wwm/best.th"],
-                     model_name="bert_wwm",
-                     weigths=None,
-                     log=False)
+model = GecBERTModel(vocab_path='data/output_vocabulary/',
+                     model_paths=['bert_wwm/best.th'],
+                     max_len=50,
+                     min_len=3,
+                     iterations=3,
+                     min_error_probability=0.0,
+                     min_probability=0.0,
+                     lowercase_tokens=0,
+                     model_name='bert_wwm',
+                     special_tokens_fix=0,
+                     log=False,
+                     confidence=0.0,
+                     is_ensemble=0,
+                     weigths=None)
 vocab = load_vocab("vocab.txt")
 tokenizer = WordpieceTokenizer(vocab=vocab)
 

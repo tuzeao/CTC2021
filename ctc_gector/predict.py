@@ -96,12 +96,6 @@ def my_main(args):
     max_val, max_idx = torch.max(all_probs, dim=-1)
     for val, idx in zip(max_val, max_idx):
         print(val, idx, int(idx), tag_to_index.get(int(idx), "None"))
-    print("＋")
-    #import torch
-    #edits_index = torch.tensor(edits_index).float().reshape(1, -1).cuda()
-    #result = torch.matmul(edits_index, all_probs)
-    #print(result)
-    #print(result.shape)
 
 
 if __name__ == '__main__':
