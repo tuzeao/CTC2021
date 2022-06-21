@@ -9,5 +9,5 @@ def read(path):
 
 data = read("data/output_vocabulary/labels.txt")
 
-tag_to_index = {i: data[i] for i in range(len(data))}
-index_to_tag = {data[i]: i for i in range(len(data))}
+tag_to_index = {data[i]: i for i in range(len(data))}
+index_to_tag = {i: data[i] for i in range(len(data))}
