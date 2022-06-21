@@ -16,6 +16,6 @@ kill_process(){
 
 
 kill_process
-nohup $python -u baike_server.py 8360 dev &
+CUDA_VISIBLE_DEVICES=5 nohup $python -u gector_server.py 8360 dev &
 echo "server in port 8360 start"
 # ps -ef | grep baike_server.py  | grep -v grep | awk -F ' ' '{print $2}' | xargs -n 1 kill -9

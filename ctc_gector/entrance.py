@@ -48,16 +48,17 @@ def gector_predict_single(source, target):
     source_tok, target_tok = tokenize(source), tokenize(target)
     all_probs = _gector_predict_single(source_tok, model)
     edits = gen_edit_type(source, target)
-    edits_index = [0]+ [index_to_tag.get(e, 16501) for e in edits]  # 加0是为了应对gector的开头cls
+    edits_index = [tag_to_index.get(e, 16501) for e in edits]  # 加0是为了应对gector的开头cls
     all_probs = all_probs[0, 1:, :]
     max_val, max_idx = torch.max(all_probs, dim=-1)
+    max_val, max_idx = max_val.tolist(), max_idx.tolist()
     for i in range(len(source)):
         word = source[i]
         edit_op = edits[i]
         edit_idx = edits_index[i]
-        edit_prob = all_probs[i, edit_idx]
-        max_idx = max_idx[i]
-        max_op = tag_to_index.get(max_idx, '@@UNKNOWN@@')
+        edit_prob = all_probs[i, edit_idx].tolist()
+        max_id = max_idx[i]
+        max_op = index_to_tag.get(max_id, '@@UNKNOWN@@')
         max_prob = max_val[i]
 
         temp = {}
@@ -66,7 +67,7 @@ def gector_predict_single(source, target):
         temp['edit_idx'] = edit_idx
         temp['edit_prob'] = edit_prob
         temp['max_op'] = max_op
-        temp['max_idx'] = max_idx
+        temp['max_idx'] = max_id
         temp['max_prob'] = max_prob
 
         output['info'].append(temp)

@@ -1,8 +1,6 @@
 from difflib import SequenceMatcher
 
 
-source = "小明有5个苹果"
-target = "小萌萌有5个苹果"
 def gen_edit_type(source, target):
     matcher = SequenceMatcher(None, source, target)
     diffs = list(matcher.get_opcodes())
@@ -24,10 +22,10 @@ def gen_edit_type(source, target):
                 all_edits.append(f"$REPLACE_{target[j1:j1+i+1]}")
     return all_edits
 
-# print(diffs)
-# for s, edit in zip(source, all_edits):
-#     print(f"{s}: {edit}")
-#
-# print(all_edits)
 
+if __name__ == "__main__":
+    source = "3的5次方是多少"
+    target = "6的3次方是多少"
+    print(gen_edit_type(source, target))
+    
 

@@ -42,9 +42,12 @@ def handler(request):
     # }
     mylogger.info(f"ACCESS: [from:{request.ip}:{request.port}][to:{request.url}][args:{req_dict}]")
     begin = time.time()
-    response = gector_predict_single(req_dict['source'], req_dict['target'])
+    source, target = req_dict['source'], req_dict['target']
+    if isinstance(req_dict['source'], list):
+        source, target = req_dict['source'][0], req_dict['target'][0]
+    response = gector_predict_single(source, target)
     time_cost = round(1000*(time.time()-begin), 1)
-    response['time_cost'] = time_cost
+    response['time_cost'] = f"{time_cost}ms"
     mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
     return sjson(response, dumps=json.dumps, ensure_ascii=False)
 
