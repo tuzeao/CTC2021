@@ -6,8 +6,9 @@ import torch
 
 # ------------------- init --------------------------------------
 model = GecBERTModel(vocab_path="data/output_vocabulary/",
-                     model_paths="bert_wwm/best.th",
+                     model_paths=["bert_wwm/best.th"],
                      model_name="bert_wwm",
+                     weigths=None,
                      log=False)
 vocab = load_vocab("vocab.txt")
 tokenizer = WordpieceTokenizer(vocab=vocab)
@@ -63,7 +64,10 @@ def gector_predict_single(source, target):
 
     return output
 
-
+if __name__ == "__main__":
+    source = "小萌有5个苹果"
+    target = "小明有5个苹果"
+    print(gector_predict_single(source, target))
 
 
 

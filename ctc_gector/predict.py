@@ -72,7 +72,10 @@ def my_main(args):
                          confidence=args.additional_confidence,
                          is_ensemble=args.is_ensemble,
                          weigths=args.weights)
-
+    print(args.model_path)
+    print(args.transformer_model)
+    print(args.vocab_path)
+    print(args)
     source = "小 萌 有 5 个 苹 果"
     target = "小 明 有 5 个 苹 果"
     all_probs = predict_probs_sentence(source, model)
@@ -83,7 +86,7 @@ def my_main(args):
     print(edits)
     edits_index = [0]+ [index_to_tag.get(e, 16501) for e in edits]
     print(edits_index)
-    all_probs = all_probs[0, :, :]
+    all_probs = all_probs[0, 1:, :]
     print(all_probs.shape)
     for i, idx in enumerate(edits_index):
         if i ==0: continue
@@ -92,8 +95,8 @@ def my_main(args):
     import torch
     max_val, max_idx = torch.max(all_probs, dim=-1)
     for val, idx in zip(max_val, max_idx):
-        print(val, idx, tag_to_index.get(idx, "None"))
-
+        print(val, idx, int(idx), tag_to_index.get(int(idx), "None"))
+    print("＋")
     #import torch
     #edits_index = torch.tensor(edits_index).float().reshape(1, -1).cuda()
     #result = torch.matmul(edits_index, all_probs)
