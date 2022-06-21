@@ -32,7 +32,7 @@ mylogger = MyLogger("mylogger").logger
 
 app = Sanic("gector")
 
-@app.route('/wiki', methods=["POST", "GET"])
+@app.route('/q', methods=["POST", "GET"])
 def handler(request):
     req_dict = request.form if request.form else request.json
     req_dict = request.args if not req_dict else req_dict
