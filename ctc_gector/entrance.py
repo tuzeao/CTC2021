@@ -47,27 +47,33 @@ def gector_predict_single(source, target):
     }
 
     source_tok, target_tok = tokenize(source), tokenize(target)
-    all_probs = _gector_predict_single(source_tok, model)
+    probs = _gector_predict_single(source_tok, model)
     edits, edits_block = gen_edit_type(source, target)
     # edits_index = [tag_to_index.get(e, 16501) for e in edits]
-    all_probs = all_probs[0, 1:, :]
-    max_val, max_idx = torch.max(all_probs, dim=-1)
+    probs = probs[0, :, :]
+    max_val, max_idx = torch.max(probs, dim=-1)
     max_val, max_idx = max_val.tolist(), max_idx.tolist()
 
     i = 0
-    offset = 1
+    offset = 0
     while i < len(edits_block):
         i2 = i-offset
-        word = source[i2] if i2 >= 0 else "$$BEGIN$$"
+        word = source[i2]
         for edit in edits_block[i]:
             edit_op = edit
             edit_idx = tag_to_index.get(edit, tag_to_index['@@UNKNOWN@@'])
-            edit_prob = all_probs[i2, edit_idx].tolist()
-            max_id = max_idx[i2]
+            edit_prob = probs[i2+1, edit_idx].tolist()
+            max_id = max_idx[i2+1]
             max_op = index_to_tag.get(max_id, 'Not Found Tag')
-            max_prob = max_val[i2]
+            max_prob = max_val[i2+1]
             if edit_op.startswith('$APPEND_'):
                 offset += 1
+                if i == 0:
+                    edit_prob = probs[i2, edit_idx].tolist()
+                    max_id = max_idx[i2]
+                    max_op = index_to_tag.get(max_id, 'Not Found Tag')
+                    max_prob = max_val[i2]
+
             temp = {}
             temp['word'] = word
             temp['edit_op'] = edit_op
@@ -85,7 +91,7 @@ def gector_predict_single(source, target):
     #     word = source[i]
     #     edit_op = edits[i]
     #     edit_idx = edits_index[i]
-    #     edit_prob = all_probs[i, edit_idx].tolist()
+    #     edit_prob = probs[i, edit_idx].tolist()
     #     max_id = max_idx[i]
     #     max_op = index_to_tag.get(max_id, '@@UNKNOWN@@')
     #     max_prob = max_val[i]
