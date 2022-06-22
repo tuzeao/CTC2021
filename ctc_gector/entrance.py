@@ -6,7 +6,7 @@ import torch
 import json
 
 # ------------------- init --------------------------------------
-model = GecBERTModel(vocab_path='data/output_vocabulary/',
+model = GecBERTModel(vocab_path='data_bak/output_vocabulary/',
                      model_paths=['bert_wwm/best.th'],
                      max_len=50,
                      min_len=3,
@@ -57,14 +57,15 @@ def gector_predict_single(source, target):
     i = 0
     offset = 0
     while i < len(edits_block):
-        word = source[i-offset]
+        i2 = i-offset
+        word = source[i2]
         for edit in edits_block[i]:
             edit_op = edit
             edit_idx = tag_to_index.get(edit, tag_to_index['@@UNKNOWN@@'])
-            edit_prob = all_probs[i, edit_idx].tolist()
-            max_id = max_idx[i]
+            edit_prob = all_probs[i2, edit_idx].tolist()
+            max_id = max_idx[i2]
             max_op = index_to_tag.get(max_id, 'Not Found Tag')
-            max_prob = max_val[i]
+            max_prob = max_val[i2]
             if edit_op.startswith('$APPEND_'):
                 if i == 0:
                     word = "$$BEGIN$$"
@@ -105,8 +106,8 @@ def gector_predict_single(source, target):
     return output
 
 if __name__ == "__main__":
-    source = "小萌有5个苹果"
-    target = "小明有5个苹果"
+    source = "小明有5个苹果"
+    target = "小明家有5个苹果"
     result = gector_predict_single(source, target)
     print(json.dumps(result, ensure_ascii=False, indent=4))
 
