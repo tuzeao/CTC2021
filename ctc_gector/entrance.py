@@ -1,7 +1,8 @@
 from tokenization import WordpieceTokenizer, convert_to_unicode, load_vocab
 from gector.my_gec_model import GecBERTModel
 from tag_index import index_to_tag, tag_to_index
-from gen_edit_type import gen_edit_type
+# from gen_edit_type import gen_edit_type
+from edit_align import gen_edit_type
 import torch
 import json
 
@@ -48,42 +49,33 @@ def gector_predict_single(source, target):
 
     source_tok, target_tok = tokenize(source), tokenize(target)
     probs = _gector_predict_single(source_tok, model)
-    edits, edits_block = gen_edit_type(source, target)
+    edits = gen_edit_type(source, target)
     # edits_index = [tag_to_index.get(e, 16501) for e in edits]
     probs = probs[0, :, :]
     max_val, max_idx = torch.max(probs, dim=-1)
     max_val, max_idx = max_val.tolist(), max_idx.tolist()
 
     i = 0
-    offset = 0
-    while i < len(edits_block):
-        i2 = i-offset
-        word = source[i2]
-        for edit in edits_block[i]:
-            edit_op = edit
-            edit_idx = tag_to_index.get(edit, tag_to_index['@@UNKNOWN@@'])
-            edit_prob = probs[i2+1, edit_idx].tolist()
-            max_id = max_idx[i2+1]
-            max_op = index_to_tag.get(max_id, 'Not Found Tag')
-            max_prob = max_val[i2+1]
-            if edit_op.startswith('$APPEND_'):
-                offset += 1
-                if i == 0:
-                    edit_prob = probs[i2, edit_idx].tolist()
-                    max_id = max_idx[i2]
-                    max_op = index_to_tag.get(max_id, 'Not Found Tag')
-                    max_prob = max_val[i2]
+    while i < len(edits):
+        for edit in edits[i]:
+            for op in edit:
+                word, edit_op = op[:2]
+                edit_idx = tag_to_index.get(edit, tag_to_index['@@UNKNOWN@@'])
+                edit_prob = probs[i, edit_idx].tolist()
+                max_id = max_idx[i]
+                max_op = index_to_tag.get(max_id, 'Not Found Tag')
+                max_prob = max_val[i]
 
-            temp = {}
-            temp['word'] = word
-            temp['edit_op'] = edit_op
-            temp['edit_idx'] = edit_idx
-            temp['edit_prob'] = edit_prob
-            temp['max_op'] = max_op
-            temp['max_idx'] = max_id
-            temp['max_prob'] = max_prob
+                temp = {}
+                temp['word'] = word
+                temp['edit_op'] = edit_op
+                temp['edit_idx'] = edit_idx
+                temp['edit_prob'] = edit_prob
+                temp['max_op'] = max_op
+                temp['max_idx'] = max_id
+                temp['max_prob'] = max_prob
 
-            output['info'].append(temp)
+                output['info'].append(temp)
 
         i += 1
 
