@@ -20,13 +20,13 @@ def gen_edit_type(source, target):
                 all_edits.append(f"$APPEND_{target[j1+i:j1+i+1]}")
         elif tag == 'replace':
             for i in range(i2-i1):
-                all_edits.append(f"$REPLACE_{target[j1:j1+i+1]}")
+                all_edits.append(f"$REPLACE_{target[j1+i:j1+i+1]}")
     return all_edits
 
 
 if __name__ == "__main__":
-    source = "6的7次方是多少"
-    target = "3的5次方是多少"
+    source = "游泳池的平均深度"
+    target = "小明家的游泳池的平均深度"
     print(gen_edit_type(source, target))
     
 
