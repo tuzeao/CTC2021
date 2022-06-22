@@ -1,7 +1,7 @@
 import argparse
 import os
 import json
-
+import re
 import Levenshtein
 import numpy as np
 from tqdm import tqdm
@@ -27,6 +27,8 @@ def levenshtein_align(source_sent, target_sent, compress=True):
 
     source_tokens = tokenizer.tokenize(source_sent)
     target_tokens = tokenizer.tokenize(target_sent)
+    source_tokens = [x.replace("##", "") for x in source_tokens]
+    target_tokens = [x.replace("##", "") for x in target_tokens]
 
     source_tokens_with_start = ["$start"] + source_tokens
     target_tokens_with_start = ["$start"] + target_tokens
@@ -113,6 +115,18 @@ def convert_edits_to_labels(source_tokens, edits, compress=True):
             labels.append(edit_operations)
     return labels
 
+def pure_number(text):
+    """判断是否是纯数字"""
+    num_pt = re.compile(r'[\d零一二两三四五六七八九十百千万亿\.]+$')
+    if num_pt.match(text):
+        return True
+    return False
+
+
+def check_number(source_token, target_token):
+    if pure_number(source_token) and pure_number(target_token):
+        return "$REPLACE_" + target_token
+    return None
 
 def apply_transformation(source_token, target_token):
     '''
@@ -125,7 +139,7 @@ def apply_transformation(source_token, target_token):
     #     if transform:
     #         return transform
     # checks = [check_equal, check_casetype, check_verb, check_comparative, check_plural_v2]
-    checks = [check_equal]
+    checks = [check_equal, check_number,]
     for check in checks:
         transform = check(source_token, target_token)
         if transform:

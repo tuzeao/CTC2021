@@ -7,7 +7,7 @@ import torch
 import json
 
 # ------------------- init --------------------------------------
-model = GecBERTModel(vocab_path='data_bak/output_vocabulary/',
+model = GecBERTModel(vocab_path='data/output_vocabulary/',
                      model_paths=['bert_wwm/best.th'],
                      max_len=50,
                      min_len=3,
@@ -41,7 +41,7 @@ def _gector_predict_single(query, model):
 
 def gector_predict_single(source, target):
     output = {
-        "version": "20220621",
+        "version": "20220622",
         "source": source,
         "target": target,
         "info": []
