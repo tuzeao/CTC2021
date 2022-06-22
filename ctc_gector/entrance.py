@@ -58,24 +58,23 @@ def gector_predict_single(source, target):
     i = 0
     while i < len(edits):
         for edit in edits[i]:
-            for op in edit:
-                word, edit_op = op[:2]
-                edit_idx = tag_to_index.get(edit, tag_to_index['@@UNKNOWN@@'])
-                edit_prob = probs[i, edit_idx].tolist()
-                max_id = max_idx[i]
-                max_op = index_to_tag.get(max_id, 'Not Found Tag')
-                max_prob = max_val[i]
+            word, edit_op = edit[:2]
+            edit_idx = tag_to_index.get(edit_op, tag_to_index['@@UNKNOWN@@'])
+            edit_prob = probs[i, edit_idx].tolist()
+            max_id = max_idx[i]
+            max_op = index_to_tag.get(max_id, 'Not Found Tag')
+            max_prob = max_val[i]
 
-                temp = {}
-                temp['word'] = word
-                temp['edit_op'] = edit_op
-                temp['edit_idx'] = edit_idx
-                temp['edit_prob'] = edit_prob
-                temp['max_op'] = max_op
-                temp['max_idx'] = max_id
-                temp['max_prob'] = max_prob
+            temp = {}
+            temp['word'] = word
+            temp['edit_op'] = edit_op
+            temp['edit_idx'] = edit_idx
+            temp['edit_prob'] = edit_prob
+            temp['max_op'] = max_op
+            temp['max_idx'] = max_id
+            temp['max_prob'] = max_prob
 
-                output['info'].append(temp)
+            output['info'].append(temp)
 
         i += 1
 
