@@ -6,6 +6,11 @@ import Levenshtein
 import numpy as np
 from tqdm import tqdm
 
+from tokenization import WordpieceTokenizer, load_vocab
+vocab = load_vocab("vocab.txt")
+tokenizer = WordpieceTokenizer(vocab=vocab)
+
+
 #convert data from parallel to tagging
 
 SEQ_DELIMETERS = {"tokens": " ",
@@ -20,8 +25,8 @@ def levenshtein_align(source_sent, target_sent, compress=True):
     # source_tokens = source_sent.split(' ')
     # target_tokens = target_sent.split(' ')
 
-    source_tokens = list(source_sent)
-    target_tokens = list(target_sent)
+    source_tokens = tokenizer.tokenize(source_sent)
+    target_tokens = tokenizer.tokenize(target_sent)
 
     source_tokens_with_start = ["$start"] + source_tokens
     target_tokens_with_start = ["$start"] + target_tokens
