@@ -55,10 +55,10 @@ def gector_predict_single(source, target):
     max_val, max_idx = max_val.tolist(), max_idx.tolist()
 
     i = 0
-    offset = 0
+    offset = 1
     while i < len(edits_block):
         i2 = i-offset
-        word = source[i2]
+        word = source[i2] if i2 >= 0 else "$$BEGIN$$"
         for edit in edits_block[i]:
             edit_op = edit
             edit_idx = tag_to_index.get(edit, tag_to_index['@@UNKNOWN@@'])
@@ -67,8 +67,6 @@ def gector_predict_single(source, target):
             max_op = index_to_tag.get(max_id, 'Not Found Tag')
             max_prob = max_val[i2]
             if edit_op.startswith('$APPEND_'):
-                if i == 0:
-                    word = "$$BEGIN$$"
                 offset += 1
             temp = {}
             temp['word'] = word
