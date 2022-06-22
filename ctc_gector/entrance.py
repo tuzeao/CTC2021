@@ -46,6 +46,7 @@ def gector_predict_single(source, target):
         "target": target,
         "info": []
     }
+    source, target = source.replace(" ", ""), target.replace(" ", "")
 
     source_tok, target_tok = tokenize(source), tokenize(target)
     probs = _gector_predict_single(source_tok, model)
