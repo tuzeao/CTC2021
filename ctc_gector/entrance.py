@@ -49,15 +49,15 @@ def gector_predict_single(source, target):
     source_tok, target_tok = tokenize(source), tokenize(target)
     all_probs = _gector_predict_single(source_tok, model)
     edits, edits_block = gen_edit_type(source, target)
-    edits_index = [tag_to_index.get(e, 16501) for e in edits]
+    # edits_index = [tag_to_index.get(e, 16501) for e in edits]
     all_probs = all_probs[0, 1:, :]
     max_val, max_idx = torch.max(all_probs, dim=-1)
     max_val, max_idx = max_val.tolist(), max_idx.tolist()
 
     i = 0
+    offset = 0
     while i < len(edits_block):
-        move_flag = True
-        word = source[i]
+        word = source[i-offset]
         for edit in edits_block[i]:
             edit_op = edit
             edit_idx = tag_to_index.get(edit, tag_to_index['@@UNKNOWN@@'])
@@ -65,9 +65,10 @@ def gector_predict_single(source, target):
             max_id = max_idx[i]
             max_op = index_to_tag.get(max_id, 'Not Found Tag')
             max_prob = max_val[i]
-            if edit_op.startswith('$APPEND_') and i == 0:
-                word = "$$BEGIN$$"
-                move_flag = False
+            if edit_op.startswith('$APPEND_'):
+                if i == 0:
+                    word = "$$BEGIN$$"
+                offset += 1
             temp = {}
             temp['word'] = word
             temp['edit_op'] = edit_op
@@ -79,10 +80,7 @@ def gector_predict_single(source, target):
 
             output['info'].append(temp)
 
-        if move_flag:
-            i += 1
-
-
+        i += 1
 
     # for i in range(len(source)):
     #     word = source[i]
