@@ -20,6 +20,7 @@ def main(args):
                 continue
             tokens = tokenizer.tokenize(line)
             line = ' '.join(tokens)
+            line = line.replace("##", "")
             w.write(f"{line}\n")
             count += 1
         print(f"input: {len(lines)}, output: {count}")
