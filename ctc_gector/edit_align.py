@@ -18,7 +18,7 @@ SEQ_DELIMETERS = {"tokens": " ",
                   "operations": "SEPL__SEPR"}
 
 
-START_TOKEN = "$start"
+START_TOKEN = "$START"
 
 
 def levenshtein_align(source_sent, target_sent, compress=True):
@@ -271,8 +271,8 @@ def gen_edit_type(source, target):
 
 
 if __name__ == '__main__':    
-    source = '5根据第一个算式分别写出下面两个算式的结果。30me5=1508me60=48030me15=16me60=30me50=32me60=25me4=10025me16=25me32='
-    target = '5 根据第一个算式 分别写出下面两个算式的结果。30 times 5 = 1508 times 60 = 48030 times 15 =16 times 60 =30 times 50 =32 times 60 =25 times 4 = 10025 times 16 =25 times 32 ='
+    source = '小红有10个苹果'
+    target = '小红有20个苹果'
     # result = levenshtein_align(source, target)
     # print(change_format(result))
     # print(gen_edit_type(source, target))
