@@ -343,20 +343,20 @@ def convert_data_from_raw_files(source_file, target_file, output_file, chunk_siz
             cnt_tp += 1
         alignments = [aligned_sent]
         cnt_all += len(alignments)
-        try:
-            check_sent = convert_tagged_line(aligned_sent)
-        except Exception:
-            # debug mode
-            aligned_sent = align_sequences(source_sent, target_sent)
-            check_sent = convert_tagged_line(aligned_sent)
-
-        if "".join(check_sent.split()) != "".join(
-                target_sent.split()):
-            # do it again for debugging
-            aligned_sent = align_sequences(source_sent, target_sent)
-            check_sent = convert_tagged_line(aligned_sent)
-            print(f"Incorrect pair: \n{target_sent}\n{check_sent}")
-            continue
+        # try:
+        #     check_sent = convert_tagged_line(aligned_sent)
+        # except Exception:
+        #     # debug mode
+        #     aligned_sent = align_sequences(source_sent, target_sent)
+        #     check_sent = convert_tagged_line(aligned_sent)
+        #
+        # if "".join(check_sent.split()) != "".join(
+        #         target_sent.split()):
+        #     # do it again for debugging
+        #     aligned_sent = align_sequences(source_sent, target_sent)
+        #     check_sent = convert_tagged_line(aligned_sent)
+        #     print(f"Incorrect pair: \n{target_sent}\n{check_sent}")
+        #     continue
         if alignments:
             cnt_total += len(alignments)
             tagged.extend(alignments)
