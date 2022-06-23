@@ -9,7 +9,7 @@ import json
 # ------------------- init --------------------------------------
 model = GecBERTModel(vocab_path='data/output_vocabulary/',
                      model_paths=['bert_wwm/best.th'],
-                     max_len=50,
+                     max_len=128,
                      min_len=3,
                      iterations=3,
                      min_error_probability=0.0,

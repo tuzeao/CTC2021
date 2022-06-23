@@ -1,7 +1,9 @@
 #!/bin/bash
 
+set -e
+set -v
 
-MODEL_PATH=ctc2021_baseline
+MODEL_PATH=bert_wwm
 VOCAB_PATH=data/output_vocabulary/
 #INPUT_FILE=dev_input.txt
 INPUT_FILE=inputs/test_ques
@@ -14,7 +16,7 @@ CUDA_VISIBLE_DEVICES=2 python predict.py \
     --transformer_model $MODEL_PATH \
     --special_tokens_fix 0 \
     --iteration_count 3 \
-    --model_path $MODEL_PATH/pytorch_model.bin \
+    --model_path $MODEL_PATH/best.th \
     --vocab_path $VOCAB_PATH \
     --input_file ${INPUT_FILE}.tok \
     --output_file $OUTPUT_FILE \

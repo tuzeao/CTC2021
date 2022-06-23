@@ -12,7 +12,8 @@ for line in tqdm(sys.stdin):
     line = line.strip()
     items = line.split('\t')
 
-    line = tokenization.convert_to_unicode(items[1])
+    #line = tokenization.convert_to_unicode(items[1])
+    line = tokenization.convert_to_unicode(items[0])
     if not line:
         print()
         continue

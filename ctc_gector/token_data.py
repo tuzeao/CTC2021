@@ -6,19 +6,19 @@ import os
 
 
 def main(args):
-    if not os.path.exists(args.i) or not os.path.exists(args.t):
+    if not os.path.exists(args.s) or not os.path.exists(args.t):
         print("？")
         sys.exit()
     vocab = load_vocab("vocab.txt")
     tokenizer = WordpieceTokenizer(vocab=vocab)
     with open(args.s, "r", encoding="utf-8") as fs, open(args.t, "r", encoding="utf-8") as ft, \
-            open(args.so, "w", encoding="utf-8") as ws, open(args.st, "w", encoding="utf-8") as wt:
+            open(args.so, "w", encoding="utf-8") as ws, open(args.to, "w", encoding="utf-8") as wt:
         source_lines = fs.readlines()
         target_lines = ft.readlines()
         count = 0
         for s, t in tqdm(zip(source_lines, target_lines)):
-            s = convert_to_unicode(s).strip()
-            t = convert_to_unicode(t).strip()
+            s = convert_to_unicode(s).strip().replace("\t", "")
+            t = convert_to_unicode(t).strip().replace("\t", "")
             if not s or not t:
                 continue
             s_tokens = tokenizer.tokenize(s)

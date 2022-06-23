@@ -1,0 +1,8 @@
+inputs*
+log/
+save_dir_*
+nohup.out
+bert_wwm/
+ctc2021_baseline/
+data_bak/
+dev_input.txt*

@@ -11,7 +11,7 @@ def main(args):
     with open(args.s, "w", encoding="utf-8") as fs, open(args.t, "w", encoding="utf-8") as ft:
         for info in df:
             t1, t2 = info[0], info[1]
-            fs.write(t1+"\n")
+            fs.write(t2+"\n")
             ft.write(t1+"\n")
 
 
