@@ -15,10 +15,11 @@ def main(args):
         lines = f.readlines()
         count = 0
         for line in tqdm(lines):
-            line = convert_to_unicode(line)
+            line = convert_to_unicode(line).strip()
             if not line:
                 continue
             tokens = tokenizer.tokenize(line)
+            if len(tokens) <= 2: continue
             line = ' '.join(tokens)
             line = line.replace("##", "")
             w.write(f"{line}\n")
