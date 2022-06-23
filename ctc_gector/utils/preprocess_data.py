@@ -5,7 +5,7 @@ from difflib import SequenceMatcher
 import Levenshtein
 import numpy as np
 from tqdm import tqdm
-
+from edit_align import align_sequences
 from helpers import write_lines, read_parallel_lines, encode_verb_form, \
     apply_reverse_transformation, SEQ_DELIMETERS, START_TOKEN
 
@@ -184,53 +184,53 @@ def apply_transformation(source_token, target_token):
     return None
 
 
-def align_sequences(source_sent, target_sent):
-    # check if sent is OK
-    if not is_sent_ok(source_sent) or not is_sent_ok(target_sent):
-        return None
-    source_tokens = source_sent.split()
-    target_tokens = target_sent.split()
-    matcher = SequenceMatcher(None, source_tokens, target_tokens)
-    diffs = list(matcher.get_opcodes())
-    all_edits = []
-    for diff in diffs:
-        tag, i1, i2, j1, j2 = diff
-        source_part = _split(" ".join(source_tokens[i1:i2]))
-        target_part = _split(" ".join(target_tokens[j1:j2]))
-        if tag == 'equal':
-            continue
-        elif tag == 'delete':
-            # delete all words separatly
-            for j in range(i2 - i1):
-                edit = [(i1 + j, i1 + j + 1), '$DELETE']
-                all_edits.append(edit)
-        elif tag == 'insert':
-            # append to the previous word
-            for target_token in target_part:
-                edit = ((i1 - 1, i1), f"$APPEND_{target_token}")
-                all_edits.append(edit)
-        else:
-            # check merge first of all
-            edits = apply_merge_transformation(source_part, target_part,
-                                               shift_idx=i1)
-            if edits:
-                all_edits.extend(edits)
-                continue
-
-            # normalize alignments if need (make them singleton)
-            _, alignments = perfect_align(source_part, target_part,
-                                          insertions_allowed=0)
-            for alignment in alignments:
-                new_shift = alignment[2][0]
-                edits = convert_alignments_into_edits(alignment,
-                                                      shift_idx=i1 + new_shift)
-                all_edits.extend(edits)
-
-    # get labels
-    labels = convert_edits_into_labels(source_tokens, all_edits)
-    # match tags to source tokens
-    sent_with_tags = add_labels_to_the_tokens(source_tokens, labels)
-    return sent_with_tags
+# def align_sequences(source_sent, target_sent):
+#     # check if sent is OK
+#     if not is_sent_ok(source_sent) or not is_sent_ok(target_sent):
+#         return None
+#     source_tokens = source_sent.split()
+#     target_tokens = target_sent.split()
+#     matcher = SequenceMatcher(None, source_tokens, target_tokens)
+#     diffs = list(matcher.get_opcodes())
+#     all_edits = []
+#     for diff in diffs:
+#         tag, i1, i2, j1, j2 = diff
+#         source_part = _split(" ".join(source_tokens[i1:i2]))
+#         target_part = _split(" ".join(target_tokens[j1:j2]))
+#         if tag == 'equal':
+#             continue
+#         elif tag == 'delete':
+#             # delete all words separatly
+#             for j in range(i2 - i1):
+#                 edit = [(i1 + j, i1 + j + 1), '$DELETE']
+#                 all_edits.append(edit)
+#         elif tag == 'insert':
+#             # append to the previous word
+#             for target_token in target_part:
+#                 edit = ((i1 - 1, i1), f"$APPEND_{target_token}")
+#                 all_edits.append(edit)
+#         else:
+#             # check merge first of all
+#             edits = apply_merge_transformation(source_part, target_part,
+#                                                shift_idx=i1)
+#             if edits:
+#                 all_edits.extend(edits)
+#                 continue
+#
+#             # normalize alignments if need (make them singleton)
+#             _, alignments = perfect_align(source_part, target_part,
+#                                           insertions_allowed=0)
+#             for alignment in alignments:
+#                 new_shift = alignment[2][0]
+#                 edits = convert_alignments_into_edits(alignment,
+#                                                       shift_idx=i1 + new_shift)
+#                 all_edits.extend(edits)
+#
+#     # get labels
+#     labels = convert_edits_into_labels(source_tokens, all_edits)
+#     # match tags to source tokens
+#     sent_with_tags = add_labels_to_the_tokens(source_tokens, labels)
+#     return sent_with_tags
 
 
 def convert_edits_into_labels(source_tokens, all_edits):

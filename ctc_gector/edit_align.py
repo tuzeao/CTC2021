@@ -94,6 +94,73 @@ def levenshtein_align(source_sent, target_sent, compress=True):
     return sent_with_tags
 
 
+def align_sequences(source_sent, target_sent, compress=True):
+    source_tokens = source_sent.split()
+    target_tokens = target_sent.split()
+    source_tokens_with_start = ["$start"] + source_tokens
+    target_tokens_with_start = ["$start"] + target_tokens
+
+    lev = [[0] * (len(target_tokens) + 1) for _ in range(len(source_tokens) + 1)]
+    ops = [[0] * (len(target_tokens) + 1) for _ in range(len(source_tokens) + 1)]
+    for i in range(1, len(source_tokens) + 1):
+        lev[i][0] = i
+        ops[i][0] = "$DELETE"
+    for j in range(1, len(target_tokens) + 1):
+        lev[0][j] = j
+        ops[0][j] = "$APPEND_" + target_tokens_with_start[j]
+    lev[0][0] = 0
+
+    for i in range(1, len(source_tokens) + 1):
+        for j in range(1, len(target_tokens) + 1):
+            cost1 = lev[i - 1][j] + 1
+            cost2 = lev[i][j - 1] + 1
+            cost3 = lev[i - 1][j - 1] + 1 if source_tokens_with_start[i] != target_tokens_with_start[j] else lev[i - 1][
+                                                                                                                 j - 1] + 0
+            transform = apply_transformation(source_tokens_with_start[i], target_tokens_with_start[j])
+            cost3 = lev[i - 1][j - 1] if transform else lev[i - 1][j - 1] + 1
+            if cost1 <= cost2 and cost1 <= cost3:
+                lev[i][j] = cost1
+                ops[i][j] = "$DELETE"
+            elif cost2 <= cost1 and cost2 <= cost3:
+                lev[i][j] = cost2
+                ops[i][j] = "$APPEND_" + target_tokens_with_start[j]
+            else:
+                lev[i][j] = cost3
+                if transform:
+                    ops[i][j] = transform
+                else:
+                    ops[i][j] = "$REPLACE_" + target_tokens_with_start[j]
+                # ops[i][j] = "$REPLACE_" + target_tokens_with_start[j]
+
+    s = len(source_tokens)
+    t = len(target_tokens)
+    edits = []
+    while s != 0 or t != 0:
+        edits.append([(s, s + 1), ops[s][t]])
+        if ops[s][t].startswith("$TRANSFORM") or ops[s][t].startswith("$REPLACE") or ops[s][t].startswith("$KEEP"):
+            s = s - 1
+            t = t - 1
+        elif ops[s][t].startswith("$APPEND"):
+            t = t - 1
+        else:
+            s = s - 1
+    edits.reverse()
+
+    # labels = []
+    # for edit in edits:
+    #     (s,t), op = edit
+    #     source_tokens_with_start[s] += "SEPL|||SEPR" + op
+    # if source_tokens_with_start[0] == "$START":
+    #     source_tokens_with_start[0] = "$START"
+    # sent_with_tags = "\t".join(source_tokens_with_start)
+
+    # get labels
+    labels = convert_edits_to_labels(source_tokens, edits, compress)
+    # match tags to source tokens
+    sent_with_tags = add_labels_to_the_tokens(source_tokens, labels)
+    return sent_with_tags
+
+
 def convert_edits_to_labels(source_tokens, edits, compress=True):
     labels = []
     for i in range(len(source_tokens) + 1):
@@ -125,7 +192,8 @@ def pure_number(text):
 
 def check_number(source_token, target_token):
     if pure_number(source_token) and pure_number(target_token):
-        return "$REPLACE_" + target_token
+        # return "$REPLACE_" + target_token
+        return "TRANSFORM_NUM"
     return None
 
 def apply_transformation(source_token, target_token):
