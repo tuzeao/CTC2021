@@ -5,6 +5,7 @@ import re
 import Levenshtein
 import numpy as np
 from tqdm import tqdm
+from collections import defaultdict
 
 from tokenization import WordpieceTokenizer, load_vocab
 vocab = load_vocab("vocab.txt")
@@ -20,6 +21,36 @@ SEQ_DELIMETERS = {"tokens": " ",
 
 START_TOKEN = "$START"
 
+def load_similar_zi():
+    record = defaultdict(list)
+    with open("data/similar_zi.txt", "r", encoding="utf8") as f:
+        for l in f:
+            item = l.split()
+            if len(item) < 2: continue
+            s1, s2 = item[:2]
+            for word in s2:
+                record[s1].append(word)
+    return record
+
+def load_math_keyword():
+    output = set()
+    with open("data/math_keywords.txt", "r", encoding="utf8") as f:
+        for l in f:
+            output.add(l.strip())
+    return output
+
+def load_unit():
+    output = {}
+    with open("data/unit_record.txt", "r", encoding="utf8") as f:
+        for l in f:
+            l = l.strip().split()
+            output[l[0]] = l[1:]
+    return output
+
+
+similar_zi = load_similar_zi()
+math_keyword = load_math_keyword()
+units = load_unit()
 
 def levenshtein_align(source_sent, target_sent, compress=True):
     # source_tokens = source_sent.split(' ')
@@ -79,14 +110,6 @@ def levenshtein_align(source_sent, target_sent, compress=True):
             s = s-1
     edits.reverse()
 
-    # labels = []
-    # for edit in edits:
-    #     (s,t), op = edit
-    #     source_tokens_with_start[s] += "SEPL|||SEPR" + op
-    # if source_tokens_with_start[0] == "$START":
-    #     source_tokens_with_start[0] = "$START"
-    # sent_with_tags = "\t".join(source_tokens_with_start)
-    
     # get labels
     labels = convert_edits_to_labels(source_tokens, edits, compress)
     # match tags to source tokens
@@ -145,15 +168,6 @@ def align_sequences(source_sent, target_sent, compress=True):
         else:
             s = s - 1
     edits.reverse()
-
-    # labels = []
-    # for edit in edits:
-    #     (s,t), op = edit
-    #     source_tokens_with_start[s] += "SEPL|||SEPR" + op
-    # if source_tokens_with_start[0] == "$START":
-    #     source_tokens_with_start[0] = "$START"
-    # sent_with_tags = "\t".join(source_tokens_with_start)
-
     # get labels
     labels = convert_edits_to_labels(source_tokens, edits, compress)
     # match tags to source tokens
@@ -167,53 +181,55 @@ def convert_edits_to_labels(source_tokens, edits, compress=True):
         edit_operations = [x[1] for x in edits if x[0][0] == i and x[0][1] == i + 1]
         if len(edit_operations) > 1:
             edit_operations = [x for x in edit_operations if x != "$KEEP"]
-        ##############################
-        ###拆分APPEND和REPLACE标签###
-        # if compress:
-        #     new_operations = []
-        #     for operation in edit_operations:
-        #         new_operations.extend(convert_append_replace(operation))
-        #     edit_operations = new_operations
-        ##############################
-
         if not edit_operations:
             labels.append(["$KEEP"])
         else:
             labels.append(edit_operations)
     return labels
 
-def pure_number(text):
-    """判断是否是纯数字"""
-    num_pt = re.compile(r'[\d零一二两三四五六七八九十百千万亿\.]+$')
-    if num_pt.match(text):
-        return True
-    return False
-
-
-def check_number(source_token, target_token):
-    if pure_number(source_token) and pure_number(target_token):
-        # return "$REPLACE_" + target_token
-        return "$TRANSFORM_NUM"
-    return None
 
 def apply_transformation(source_token, target_token):
     '''
-    检查source_token与target_token是否满足大小写、单复数等的变化
+        检查source_token与target_token是否满足大小写、单复数等的变化
     '''
-    # target_tokens = target_token.split()
-    # if len(target_tokens) > 1:
-    #     # check split
-    #     transform = check_split(source_token, target_tokens)
-    #     if transform:
-    #         return transform
-    # checks = [check_equal, check_casetype, check_verb, check_comparative, check_plural_v2]
-    checks = [check_equal, check_number,]
+    checks = [check_equal, check_number, check_similar_zi, check_unit, check_mathword]
     for check in checks:
         transform = check(source_token, target_token)
         if transform:
             return transform
     return None
 
+
+def check_mathword(source, target):
+    if source in math_keyword and target in math_keyword:
+        return "$TRANSFORM_MATH"
+    return None
+
+
+def check_unit(source, target):
+    if source in units.get(target, []):
+        return "$TRANSFORM_UNIT"
+    return None
+
+
+def check_similar_zi(source, target):
+    if source in similar_zi.get(target, []):
+        return "$TRANSFORM_OCR"
+    return None
+
+
+def check_number(source_token, target_token):
+    def pure_number(text):
+        """判断是否是纯数字"""
+        num_pt = re.compile(r'[\d零一二两三四五六七八九十百千万亿\.]+$')
+        if num_pt.match(text):
+            return True
+        return False
+
+    if pure_number(source_token) and pure_number(target_token):
+        # return "$REPLACE_" + target_token
+        return "$TRANSFORM_NUM"
+    return None
 
 def check_equal(source_token, target_token):
     if source_token == target_token:
@@ -271,12 +287,13 @@ def gen_edit_type(source, target):
 
 
 if __name__ == '__main__':    
-    source = '小红有10个苹果'
-    target = '小红有20个苹果'
+    source = '小百有10个元dm'
+    target = '小百有10个角m'
     # result = levenshtein_align(source, target)
     # print(change_format(result))
     # print(gen_edit_type(source, target))
     for info in gen_edit_type(source, target):
         print(info)
-
-    print(levenshtein_align(source, target))
+    #
+    # print(levenshtein_align(source, target))
+    # print(units)

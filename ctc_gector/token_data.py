@@ -1,4 +1,5 @@
 from tokenization import WordpieceTokenizer, convert_to_unicode, load_vocab
+from text_utils import text_process
 from tqdm import tqdm
 import argparse
 import sys
@@ -19,6 +20,8 @@ def main(args):
         for s, t in tqdm(zip(source_lines, target_lines)):
             s = convert_to_unicode(s).strip().replace("\t", "")
             t = convert_to_unicode(t).strip().replace("\t", "")
+            s, t = text_process(s), text_process(t)
+
             if not s or not t:
                 continue
             s_tokens = tokenizer.tokenize(s)
