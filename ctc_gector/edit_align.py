@@ -193,7 +193,7 @@ def pure_number(text):
 def check_number(source_token, target_token):
     if pure_number(source_token) and pure_number(target_token):
         # return "$REPLACE_" + target_token
-        return "TRANSFORM_NUM"
+        return "$TRANSFORM_NUM"
     return None
 
 def apply_transformation(source_token, target_token):
@@ -272,7 +272,7 @@ def gen_edit_type(source, target):
 
 if __name__ == '__main__':    
     source = '小红有5个苹果'
-    target = '小明家有5个苹果'
+    target = '小红有6个苹果'
     # result = levenshtein_align(source, target)
     # print(change_format(result))
     print(gen_edit_type(source, target))
