@@ -1,4 +1,5 @@
-from tokenization import WordpieceTokenizer, convert_to_unicode, load_vocab
+#from tokenization import WordpieceTokenizer, convert_to_unicode, load_vocab
+from tokenization import BasicTokenizer
 from gector.my_gec_model import GecBERTModel
 from tag_index import index_to_tag, tag_to_index
 # from gen_edit_type import gen_edit_type
@@ -21,9 +22,9 @@ model = GecBERTModel(vocab_path='data/output_vocabulary/',
                      confidence=0.0,
                      is_ensemble=0,
                      weigths=None)
-vocab = load_vocab("vocab.txt")
-tokenizer = WordpieceTokenizer(vocab=vocab)
-
+#vocab = load_vocab("vocab.txt")
+#tokenizer = WordpieceTokenizer(vocab=vocab, max_input_chars_per_word=256)
+tokenizer = BasicTokenizer()
 
 
 def tokenize(query):
@@ -41,7 +42,7 @@ def _gector_predict_single(query, model):
 
 def gector_predict_single(source, target):
     output = {
-        "version": "20220622",
+        "version": "20220627_v2",
         "source": source,
         "target": target,
         "info": []
@@ -102,8 +103,8 @@ def gector_predict_single(source, target):
     return output
 
 if __name__ == "__main__":
-    source = "小明有5个苹果"
-    target = "小明家有5个苹果"
+    source = "在跳绳比赛中‘小华跳了162个;比小红跳的3倍少54个小红跳了多少个？"
+    target = "在跳绳比赛中，小华跳了162个，比小红跳的3倍少54个。小红跳了多少个？"
     result = gector_predict_single(source, target)
     print(json.dumps(result, ensure_ascii=False, indent=4))
 
