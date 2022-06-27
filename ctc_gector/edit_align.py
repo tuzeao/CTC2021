@@ -7,10 +7,10 @@ import numpy as np
 from tqdm import tqdm
 from collections import defaultdict
 
-from tokenization import WordpieceTokenizer, load_vocab
-vocab = load_vocab("vocab.txt")
-tokenizer = WordpieceTokenizer(vocab=vocab)
-
+from tokenization import WordpieceTokenizer, load_vocab, BasicTokenizer
+# vocab = load_vocab("vocab.txt")
+# tokenizer = WordpieceTokenizer(vocab=vocab, max_input_chars_per_word=200)
+tokenizer = BasicTokenizer()
 
 #convert data from parallel to tagging
 
@@ -287,13 +287,12 @@ def gen_edit_type(source, target):
 
 
 if __name__ == '__main__':    
-    source = '小百有10个元dm'
-    target = '小百有10个角m'
-    # result = levenshtein_align(source, target)
-    # print(change_format(result))
+    source = '在跳绳比赛中‘小华跳了162个;比小红跳的3倍少54个小红跳了多少个？'
+    target = '在跳绳比赛中，小华跳了162个，比小红跳的3倍少54个。小红跳了多少个？'
     # print(gen_edit_type(source, target))
     for info in gen_edit_type(source, target):
         print(info)
-    #
-    # print(levenshtein_align(source, target))
-    # print(units)
+
+    # res = tokenizer.tokenize(source)
+    # print(res)
+
