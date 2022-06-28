@@ -1,4 +1,4 @@
-from tokenization import WordpieceTokenizer, convert_to_unicode, load_vocab
+from tokenization import WordpieceTokenizer, convert_to_unicode, load_vocab, BasicTokenizer
 from text_utils import text_process
 from tqdm import tqdm
 import argparse
@@ -10,8 +10,8 @@ def main(args):
     if not os.path.exists(args.s) or not os.path.exists(args.t):
         print("？")
         sys.exit()
-    vocab = load_vocab("vocab.txt")
-    tokenizer = WordpieceTokenizer(vocab=vocab)
+    # vocab = load_vocab("vocab.txt")
+    tokenizer = BasicTokenizer()
     with open(args.s, "r", encoding="utf-8") as fs, open(args.t, "r", encoding="utf-8") as ft, \
             open(args.so, "w", encoding="utf-8") as ws, open(args.to, "w", encoding="utf-8") as wt:
         source_lines = fs.readlines()
