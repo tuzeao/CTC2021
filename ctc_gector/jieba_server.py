@@ -1,4 +1,5 @@
 from jieba_math import math_pos_seg
+from clean_yodao_sql_qbody import sql_qbody_process, clean_qbody_text, clean_some_latex, server_text_to_ocr, clean_html_and_to_ocr
 import asyncio
 from sanic import Sanic
 from sanic import log
@@ -32,7 +33,7 @@ mylogger = MyLogger("mylogger").logger
 
 app = Sanic("gector")
 
-@app.route('/q', methods=["POST", "GET"])
+@app.route('/jieba_cut', methods=["POST", "GET"])
 def handler(request):
     req_dict = request.form if request.form else request.json
     req_dict = request.args if not req_dict else req_dict
@@ -45,9 +46,48 @@ def handler(request):
     query = req_dict['q']
     response = math_pos_seg(query)
     time_cost = round(1000*(time.time()-begin), 1)
-    response['time_cost'] = f"{time_cost}ms"
     mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
     return sjson(response, dumps=json.dumps, ensure_ascii=False)
+
+
+@app.route('/tiku_sql_clean', methods=["POST", "GET"])
+def handler(request):
+    req_dict = request.form if request.form else request.json
+    req_dict = request.args if not req_dict else req_dict
+    # req_dict = {
+    #     'source': request.form.get("source"),
+    #     'target': request.form.get("target"),
+    # }
+    mylogger.info(f"ACCESS: [from:{request.ip}:{request.port}][to:{request.url}][args:{req_dict}]")
+    begin = time.time()
+    query = req_dict['qbody']
+    response = sql_qbody_process(query)
+    time_cost = round(1000*(time.time()-begin), 1)
+    mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
+    return sjson(response, dumps=json.dumps, ensure_ascii=False)
+
+
+@app.route('/text_tools', methods=["POST", "GET"])
+def handler(request):
+    req_dict = request.form if request.form else request.json
+    req_dict = request.args if not req_dict else req_dict
+    # req_dict = {
+    #     'source': request.form.get("source"),
+    #     'target': request.form.get("target"),
+    # }
+    mylogger.info(f"ACCESS: [from:{request.ip}:{request.port}][to:{request.url}][args:{req_dict}]")
+    begin = time.time()
+    query = req_dict['q']
+    action = req_dict['action']
+    action_map = {
+        "remove_html": clean_qbody_text, "remove_latex": clean_some_latex, "trans_ocr": server_text_to_ocr,
+        "all": clean_html_and_to_ocr
+    }
+    response = action_map.get(action, "all")(query)
+    time_cost = round(1000*(time.time()-begin), 1)
+    mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
+    return sjson(response, dumps=json.dumps, ensure_ascii=False)
+
 
 
 if __name__ == "__main__":
