@@ -44,7 +44,9 @@ def handler(request):
     mylogger.info(f"ACCESS: [from:{request.ip}:{request.port}][to:{request.url}][args:{req_dict}]")
     begin = time.time()
     query = req_dict['q']
-    response = math_pos_seg(query)
+    if not query:
+        query = [""]
+    response = math_pos_seg(query[0])
     time_cost = round(1000*(time.time()-begin), 1)
     mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
     return sjson(response, dumps=json.dumps, ensure_ascii=False)
@@ -61,7 +63,9 @@ def handler(request):
     mylogger.info(f"ACCESS: [from:{request.ip}:{request.port}][to:{request.url}][args:{req_dict}]")
     begin = time.time()
     query = req_dict['qbody']
-    response = sql_qbody_process(query)
+    if not query:
+        query = [""]
+    response = sql_qbody_process(query[0])
     time_cost = round(1000*(time.time()-begin), 1)
     mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
     return sjson(response, dumps=json.dumps, ensure_ascii=False)
