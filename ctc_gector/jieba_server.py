@@ -65,7 +65,7 @@ def handler(request):
     query = req_dict['qbody']
     if not query:
         query = [""]
-    response = sql_qbody_process(query[0])
+    response = sql_qbody_process(json.loads(query[0]))
     time_cost = round(1000*(time.time()-begin), 1)
     mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
     return sjson(response, dumps=json.dumps, ensure_ascii=False)
@@ -82,12 +82,12 @@ def handler(request):
     mylogger.info(f"ACCESS: [from:{request.ip}:{request.port}][to:{request.url}][args:{req_dict}]")
     begin = time.time()
     query = req_dict['q'][0]
-    action = req_dict['action'][0]
+    action = req_dict.get('action', 'all')
     action_map = {
         "remove_html": clean_qbody_text, "remove_latex": clean_some_latex, "trans_ocr": server_text_to_ocr,
         "all": clean_html_and_to_ocr
     }
-    result = action_map.get(action, "all")(query)
+    result = action_map[action](query)
     response = {
         "query": query,
         "new_query": result,
