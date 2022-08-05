@@ -81,13 +81,18 @@ def handler(request):
     # }
     mylogger.info(f"ACCESS: [from:{request.ip}:{request.port}][to:{request.url}][args:{req_dict}]")
     begin = time.time()
-    query = req_dict['q']
-    action = req_dict['action']
+    query = req_dict['q'][0]
+    action = req_dict['action'][0]
     action_map = {
         "remove_html": clean_qbody_text, "remove_latex": clean_some_latex, "trans_ocr": server_text_to_ocr,
         "all": clean_html_and_to_ocr
     }
-    response = action_map.get(action, "all")(query)
+    result = action_map.get(action, "all")(query)
+    response = {
+        "query": query,
+        "new_query": result,
+        "action": action
+    }
     time_cost = round(1000*(time.time()-begin), 1)
     mylogger.info(f"FINISH: [query: {req_dict.get('query')}][耗时: {time_cost}ms]")
     return sjson(response, dumps=json.dumps, ensure_ascii=False)
