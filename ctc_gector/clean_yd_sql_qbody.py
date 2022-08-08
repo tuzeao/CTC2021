@@ -70,7 +70,7 @@ def reformat_output(data):
 
     return data
 
-def sql_qbody_process(qbody):
+def clean_yd_process(qbody):
     result = get_qbody_content(qbody)
     result = reformat_output(result)
     return result
@@ -88,7 +88,7 @@ if __name__ == '__main__':
             print(qbody)
         # print(idx, reformat_output(result))
         # print(idx, reformat_output(result))
-        print(sql_qbody_process(qbody))
+        print(clean_yd_process(qbody))
 
     # s = "<p>照样子看图圈数。</p><p><img class='_img_block' src='https://nos.netease.com/yd-searchq/a9ca7c94-2238-4d1b-bfdb-3ad5c3f2e93e.png' title='1651369779278.png' alt='image.png' width='500' height='109.10404624277457' style='width:500px;height:109.10404624277457px;'/></p>"
     # print(clean_qbody_text(s))

@@ -57,7 +57,7 @@ def options_with_abcd(text: str, strict=False):
             else:
                 op = op.strip().strip(".").replace("@##&", "")
                 break
-        output.append([char, op])
+        output.append([char.strip().strip("."), op.strip()])
         return rest
 
     search_char = ['d.', 'c.', 'b.', 'a.'] if strict else ['d', 'c', 'b', 'a']
@@ -159,12 +159,15 @@ if __name__ == '__main__':
     f = open("dev_input.txt", "r", encoding="utf-8")
     for line in f:
         qbody = line.strip()
-        print(clean_html_and_to_ocr_3rd(line))
+        print(clean_html_and_to_ocr_3rd(qbody))
         print(clean_3rd_process(qbody))
 
 
     # strs = [
-    #     "数轴上有两个点分别是-\frac{1}{2}和-1，其中(※)更接近0.A.-\frac{1}{2}B.-1c.同样接近",
+    #     "7.21.6=4.5，里应该填(※).A.-B.\timesc.÷",
+    #     "",
+    #     "",
+    #     "",
     #     "",
     #     "",
     #     "",
@@ -173,7 +176,8 @@ if __name__ == '__main__':
     # ]
     # for s in strs:
     #     if not s: continue
-    #     clean_s = clean_html_and_to_ocr(s)
+    #     print(s)
+    #     clean_s = clean_html_and_to_ocr_3rd(s)
     #     print(clean_s)
     #     print(options_with_abcd(clean_s, strict=True))
     #     print(options_with_symbol_1234(clean_s))

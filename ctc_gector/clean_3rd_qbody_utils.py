@@ -2,38 +2,38 @@ from clean_trans_symbol_to_ocr import clean_label
 import re
 
 
-FRAC_pt_all = re.compile(r'frac \d+ \d+')
 FRAC_pt = re.compile(r'frac (\d+) (\d+)')
+TEXT_pt = re.compile(r'\\text{(.+?)}')
+POWER_pt = re.compile(r'{{(.+)}\^{(.+?)}}')
 
 
-def clean_some_latex(text):
+def replace_some_latex_3rd(text):
+    # 这里是把latex符号转成我们ocr用的符号
     text = text.replace('&gt;', '>')
     text = text.replace('&lt;', '<')
     text = text.replace(' square ', '※')
     text = text.replace(' div ', '÷')
     text = text.replace('\div', '÷')
     text = text.replace(' times ', '×')
-    text = text.replace('\times ', '×')
+    text = text.replace('\\times', '×')
     text = text.replace(' quad ', ' ')
     text = text.replace(' geq ', '≥')
     text = text.replace(' leq ', '≤')
     text = text.replace('$$', '')
     text = text.replace('\pi', 'π')
+    text = text.replace('\square', '□')
+    text = text.replace('{}^\circ', '°')
+
+    # 没用的符号
+    text = text.replace('\\left', '')
+    text = text.replace('\\right', '')
 
     # bad case
     text = text.replace('\%', '%')
-
-
-    def _frac_replace(text):
-        m = FRAC_pt_all.findall(text)
-        for frac_text in m:
-            num = FRAC_pt.search(frac_text)
-            d1, d2 = num.group(1), num.group(2)
-            new_frac = "\\frac{%s}{%s}" % (d1, d2)
-            text = text.replace(frac_text, new_frac)
-        return text
-    text = _frac_replace(text)
-
+    # latex 格式转换
+    text = re.sub(FRAC_pt, r"\\frac{\1}{\2}", text, 0)
+    text = re.sub(TEXT_pt, r"\1", text, 0)
+    text = re.sub(POWER_pt, r"\1^{\2}", text, 0)
 
     return text
 
@@ -97,7 +97,7 @@ def clean_qbody_text(text):
 
 def clean_html_and_to_ocr_3rd(text):
     text = clean_qbody_text(text)
-    text = clean_some_latex(text)
+    text = replace_some_latex_3rd(text)
     text = clean_label(text)
     # 最终去空格，符合ocr要求
     text = text.replace(' ', '')
