@@ -95,13 +95,13 @@ def handler(request):
     _map = {
         "yd": {
             "remove_html": clean_qbody_text,
-            "remove_latex": clean_some_latex,
+            "trans_latex": clean_some_latex,
             "trans_ocr": server_text_to_ocr,
             "all": clean_html_and_to_ocr_yd,
         },
         "3rd": {
             "remove_html": clean_qbody_text,
-            "remove_latex": replace_some_latex_3rd,
+            "trans_latex": replace_some_latex_3rd,
             "trans_ocr": server_text_to_ocr,
             "all": clean_html_and_to_ocr_3rd,
         }
