@@ -1,5 +1,5 @@
 from jieba_math import math_pos_seg
-from clean_yodao_sql_qbody import sql_qbody_process, clean_qbody_text, clean_some_latex, server_text_to_ocr, clean_html_and_to_ocr
+from clean_yd_sql_qbody import sql_qbody_process, clean_qbody_text, clean_some_latex, server_text_to_ocr, clean_html_and_to_ocr_yd
 import asyncio
 from sanic import Sanic
 from sanic import log
@@ -85,7 +85,7 @@ def handler(request):
     action = req_dict.get('action', 'all')
     action_map = {
         "remove_html": clean_qbody_text, "remove_latex": clean_some_latex, "trans_ocr": server_text_to_ocr,
-        "all": clean_html_and_to_ocr
+        "all": clean_html_and_to_ocr_yd
     }
     result = action_map[action](query)
     response = {
