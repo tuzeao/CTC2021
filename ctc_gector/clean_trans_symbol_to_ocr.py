@@ -221,14 +221,14 @@ def clean_superscript(strs):
         strs = strs.replace('²', '^{2}')
         strs = strs.replace('³', '^{3}')
         strs = strs.replace('⁴', '^{4}')
-        strs = strs.replace('°', '^{°}')
+        # strs = strs.replace('°', '^{°}')
         strs = re.sub(r'\^([^{]*?)}', r'^{\1}', strs) # 2^2} -> 2^{2}
         strs = re.sub(r'\^([^{][0-9\.]*)', r'^{\1}', strs)  # 2^2->2^{2}
     else:
         strs = strs.replace('²', '^{2}')
         strs = strs.replace('³', '^{3}')
         strs = strs.replace('⁴', '^{4}')
-        strs = strs.replace('°', '^{°}')
+        # strs = strs.replace('°', '^{°}')
     return strs
 
 

@@ -23,6 +23,7 @@ def replace_some_latex_3rd(text):
     text = text.replace('\pi', 'π')
     text = text.replace('\square', '□')
     text = text.replace('{}^\circ', '°')
+    text = text.replace('\sim', '~')
 
     # 没用的符号
     text = text.replace('\\left', '')
